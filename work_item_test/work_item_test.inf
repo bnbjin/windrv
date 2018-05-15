@@ -1,0 +1,90 @@
+;
+; work_item_test.inf
+;
+
+[Version]
+Signature="$WINDOWS NT$"
+Class=Sample ; TODO: edit Class
+ClassGuid={78A1C341-4539-11d3-B88D-00C04FAD5171} ; TODO: edit ClassGuid
+Provider=%ManufacturerName%
+CatalogFile=work_item_test.cat
+DriverVer= ; TODO: set DriverVer in stampinf property pages
+
+[DestinationDirs]
+DefaultDestDir = 12
+
+; ================= Class section =====================
+
+[ClassInstall32]
+Addreg=SampleClassReg
+
+[SampleClassReg]
+HKR,,,0,%ClassName%
+HKR,,Icon,,-5
+
+[SourceDisksNames]
+1 = %DiskName%,,,""
+
+[SourceDisksFiles]
+work_item_test.sys  = 1,,
+
+;*****************************************
+; Install Section
+;*****************************************
+
+[Manufacturer]
+%ManufacturerName%=Standard,NT$ARCH$
+
+[Standard.NT$ARCH$]
+%work_item_test.DeviceDesc%=work_item_test_Device, Root\work_item_test ; TODO: edit hw-id
+
+[work_item_test_Device.NT]
+CopyFiles=Drivers_Dir
+
+[Drivers_Dir]
+work_item_test.sys
+
+;-------------- Service installation
+[work_item_test_Device.NT.Services]
+AddService = work_item_test,%SPSVCINST_ASSOCSERVICE%, work_item_test_Service_Inst
+
+; -------------- work_item_test driver install sections
+[work_item_test_Service_Inst]
+DisplayName    = %work_item_test.SVCDESC%
+ServiceType    = 1               ; SERVICE_KERNEL_DRIVER
+StartType      = 3               ; SERVICE_DEMAND_START
+ErrorControl   = 1               ; SERVICE_ERROR_NORMAL
+ServiceBinary  = %12%\work_item_test.sys
+
+;
+;--- work_item_test_Device Coinstaller installation ------
+;
+
+[DestinationDirs]
+work_item_test_Device_CoInstaller_CopyFiles = 11
+
+[work_item_test_Device.NT.CoInstallers]
+AddReg=work_item_test_Device_CoInstaller_AddReg
+CopyFiles=work_item_test_Device_CoInstaller_CopyFiles
+
+[work_item_test_Device_CoInstaller_AddReg]
+HKR,,CoInstallers32,0x00010000, "WdfCoInstaller$KMDFCOINSTALLERVERSION$.dll,WdfCoInstaller"
+
+[work_item_test_Device_CoInstaller_CopyFiles]
+WdfCoInstaller$KMDFCOINSTALLERVERSION$.dll
+
+[SourceDisksFiles]
+WdfCoInstaller$KMDFCOINSTALLERVERSION$.dll=1 ; make sure the number matches with SourceDisksNames
+
+[work_item_test_Device.NT.Wdf]
+KmdfService =  work_item_test, work_item_test_wdfsect
+[work_item_test_wdfsect]
+KmdfLibraryVersion = $KMDFVERSION$
+
+[Strings]
+SPSVCINST_ASSOCSERVICE= 0x00000002
+ManufacturerName="<Your manufacturer name>" ;TODO: Replace with your manufacturer name
+ClassName="Samples" ; TODO: edit ClassName
+DiskName = "work_item_test Installation Disk"
+work_item_test.DeviceDesc = "work_item_test Device"
+work_item_test.SVCDESC = "work_item_test Service"

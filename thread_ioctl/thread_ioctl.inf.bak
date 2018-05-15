@@ -1,0 +1,90 @@
+;
+; thread_ioctl.inf
+;
+
+[Version]
+Signature="$WINDOWS NT$"
+Class=Sample ; TODO: edit Class
+ClassGuid={78A1C341-4539-11d3-B88D-00C04FAD5171} ; TODO: edit ClassGuid
+Provider=%ManufacturerName%
+CatalogFile=thread_ioctl.cat
+DriverVer= ; TODO: set DriverVer in stampinf property pages
+
+[DestinationDirs]
+DefaultDestDir = 12
+
+; ================= Class section =====================
+
+[ClassInstall32]
+Addreg=SampleClassReg
+
+[SampleClassReg]
+HKR,,,0,%ClassName%
+HKR,,Icon,,-5
+
+[SourceDisksNames]
+1 = %DiskName%,,,""
+
+[SourceDisksFiles]
+thread_ioctl.sys  = 1,,
+
+;*****************************************
+; Install Section
+;*****************************************
+
+[Manufacturer]
+%ManufacturerName%=Standard,NT$ARCH$
+
+[Standard.NT$ARCH$]
+%thread_ioctl.DeviceDesc%=thread_ioctl_Device, Root\thread_ioctl ; TODO: edit hw-id
+
+[thread_ioctl_Device.NT]
+CopyFiles=Drivers_Dir
+
+[Drivers_Dir]
+thread_ioctl.sys
+
+;-------------- Service installation
+[thread_ioctl_Device.NT.Services]
+AddService = thread_ioctl,%SPSVCINST_ASSOCSERVICE%, thread_ioctl_Service_Inst
+
+; -------------- thread_ioctl driver install sections
+[thread_ioctl_Service_Inst]
+DisplayName    = %thread_ioctl.SVCDESC%
+ServiceType    = 1               ; SERVICE_KERNEL_DRIVER
+StartType      = 3               ; SERVICE_DEMAND_START
+ErrorControl   = 1               ; SERVICE_ERROR_NORMAL
+ServiceBinary  = %12%\thread_ioctl.sys
+
+;
+;--- thread_ioctl_Device Coinstaller installation ------
+;
+
+[DestinationDirs]
+thread_ioctl_Device_CoInstaller_CopyFiles = 11
+
+[thread_ioctl_Device.NT.CoInstallers]
+AddReg=thread_ioctl_Device_CoInstaller_AddReg
+CopyFiles=thread_ioctl_Device_CoInstaller_CopyFiles
+
+[thread_ioctl_Device_CoInstaller_AddReg]
+HKR,,CoInstallers32,0x00010000, "WdfCoInstaller$KMDFCOINSTALLERVERSION$.dll,WdfCoInstaller"
+
+[thread_ioctl_Device_CoInstaller_CopyFiles]
+WdfCoInstaller$KMDFCOINSTALLERVERSION$.dll
+
+[SourceDisksFiles]
+WdfCoInstaller$KMDFCOINSTALLERVERSION$.dll=1 ; make sure the number matches with SourceDisksNames
+
+[thread_ioctl_Device.NT.Wdf]
+KmdfService =  thread_ioctl, thread_ioctl_wdfsect
+[thread_ioctl_wdfsect]
+KmdfLibraryVersion = $KMDFVERSION$
+
+[Strings]
+SPSVCINST_ASSOCSERVICE= 0x00000002
+ManufacturerName="<Your manufacturer name>" ;TODO: Replace with your manufacturer name
+ClassName="Samples" ; TODO: edit ClassName
+DiskName = "thread_ioctl Installation Disk"
+thread_ioctl.DeviceDesc = "thread_ioctl Device"
+thread_ioctl.SVCDESC = "thread_ioctl Service"
